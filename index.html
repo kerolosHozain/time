@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منظم وقت المذاكرة</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Tajawal', sans-serif; background: #f8fbff; color: #333; }
+    .task-form-card { background: #fff; padding: 2rem; margin: 2rem auto; border-radius: 1.25rem; max-width: 850px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .dark-mode { background-color: #121212 !important; color: #f0f0f0 !important; }
+    .dark-mode .task-form-card { background-color: #1e1e1e !important; color: #fff !important; }
+    .hero-banner {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    border-radius: 1.5rem;
+    margin: 2rem auto;
+    max-width: 850px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  .hero-banner h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  .hero-banner p {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in {
+    animation: fadeIn 0.6s ease-in-out both;
+  }
+  .task-form-card {
+    transition: box-shadow 0.3s ease;
+  }
+  .task-form-card:hover {
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+  }
+</style>
+</head>
+<body>
+  <header class="text-center py-4 bg-primary text-white">
+  <div class="hero-banner">
+    <div class="mb-3">
+      <p><strong>كيرلس حزين مرزوق قسطنجي</strong></p>
+      <p>free_edu2314131@edu.asu.edu.eg</p>
+      <p><strong>مادة:</strong> تصميم مواقع</p>
+      <p><strong>مشرف المادة:</strong> د. محمد عنتر</p>
+    </div>
+    <h2>📚 أهلاً بك في منظم وقت المذاكرة</h2>
+    <p>قم بإدارة مهامك اليومية بسهولة وفعالية مع مؤقت بومودورو وواجهة جذابة!</p>
+  </div>
+    <h1>منظم وقت المذاكرة</h1>
+    <button class="btn btn-light btn-sm mt-3" onclick="toggleDarkMode()">🌙 الوضع الليلي</button>
+  </header>
+
+<!-- نموذج إضافة مهمة -->
+<div class="task-form-card fade-in">
+  <h3 class="text-center">إضافة مهمة جديدة</h3>
+  <form onsubmit="addTask(event)">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <input type="text" class="form-control" id="task-title" placeholder="عنوان المهمة" required>
+      </div>
+      <div class="col-md-6">
+        <input type="time" class="form-control" id="task-time">
+      </div>
+      <div class="col-md-4">
+        <select class="form-select" id="task-day">
+          <option selected disabled>اختر اليوم</option>
+          <option>السبت</option>
+          <option>الأحد</option>
+          <option>الإثنين</option>
+          <option>الثلاثاء</option>
+          <option>الأربعاء</option>
+          <option>الخميس</option>
+          <option>الجمعة</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select class="form-select" id="task-priority">
+          <option selected disabled>الأولوية</option>
+          <option>عالية</option>
+          <option>متوسطة</option>
+          <option>منخفضة</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <input type="text" class="form-control" id="task-note" placeholder="ملاحظات أو تصنيف">
+      </div>
+      <div class="col-12 text-center">
+        <button type="submit" class="btn btn-primary px-5">إضافة</button>
+      </div>
+    </div>
+    <div class="col-12 text-center">
+      <input type="file" id="import-file" class="form-control" accept=".csv,.json" onchange="importTasks(event)">
+    </div>
+  </form>
+</div>
+
+  <!-- فلترة اليوم -->
+  <div class="task-form-card">
+    <h5>فلترة المهام حسب اليوم:</h5>
+    <select class="form-select" onchange="filterByDay(this.value)">
+      <option value="">عرض الكل</option>
+      <option>السبت</option>
+      <option>الأحد</option>
+      <option>الإثنين</option>
+      <option>الثلاثاء</option>
+      <option>الأربعاء</option>
+      <option>الخميس</option>
+      <option>الجمعة</option>
+    </select>
+  </div>
+
+  <!-- قسم مهام اليوم -->
+  <section class="task-form-card fade-in">
+    <h3 class="text-center" id="today-heading"></h3>
+    <div class="text-center mb-3">
+      <button class="btn btn-outline-secondary btn-sm" onclick="renderTodayTasks(true)">عرض جميع الأيام</button>
+    </div>
+    <ul id="today-task-list" class="list-group"></ul>
+  </section>
+
+<!-- تقويم أسبوعي بسيط -->
+<section class="task-form-card">
+  <h3 class="text-center">جدول المهام الأسبوعي</h3>
+  <div class="table-responsive">
+    <table class="table table-bordered text-center align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>اليوم</th>
+          <th>المهام</th>
+        </tr>
+      </thead>
+      <tbody id="weekly-calendar"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- مؤشر التقدم -->
+<section class="task-form-card">
+  <h3 class="text-center">نسبة إنجاز المهام</h3>
+  <div class="progress" style="height: 30px;">
+    <div class="progress-bar progress-bar-striped bg-success" id="progress-bar" style="width: 0%">0% مكتملة</div>
+  </div>
+</section>
+
+<!-- قائمة كل المهام -->
+<section class="task-form-card">
+  <h3 class="text-center">كل المهام</h3>
+  <ul id="task-list" class="list-group"></ul>
+  <div class="text-center mt-3">
+    <button class="btn btn-outline-danger" onclick="deleteAllTasks()">🗑️ حذف جميع المهام</button>
+    <button class="btn btn-outline-primary" onclick="exportTasks()">📁 تصدير CSV</button>
+  </div>
+</section>
+
+<!-- مؤقت بومودورو -->
+<section class="task-form-card text-center">
+  <h3>مؤقت بومودورو</h3>
+  <div id="pomodoro-timer" style="font-size: 2rem; margin-bottom: 1rem;">25:00</div>
+  <button class="btn btn-success px-4" onclick="startPomodoro()">ابدأ المؤقت</button>
+  <button class="btn btn-warning px-4" onclick="pausePomodoro()">⏸️ إيقاف</button>
+</section>
+
+  <script>
+    let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+
+// حساب نسبة المهام المكتملة
+function calculateProgress() {
+  const progress = document.getElementById("progress-bar");
+  const doneCount = tasks.filter(t => t.done).length;
+  const percent = tasks.length ? Math.round((doneCount / tasks.length) * 100) : 0;
+  progress.style.width = percent + "%";
+  progress.textContent = percent + "% مكتملة";
+}
+
+    function saveTasks() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks();
+  renderTasks();
+  renderTodayTasks();
+  calculateProgress();
+renderWeeklyCalendar();
+}
+
+function addTask(e) {
+  e.preventDefault();
+  const task = {
+    id: Date.now(),
+    title: document.getElementById("task-title").value,
+    time: document.getElementById("task-time").value,
+    day: document.getElementById("task-day").value,
+    priority: document.getElementById("task-priority").value,
+    note: document.getElementById("task-note").value,
+    done: false
+  };
+  tasks.push(task);
+  saveTasks();
+  renderTasks();
+  renderTodayTasks();
+  calculateProgress();
+  e.target.reset();
+}
+  function renderTodayTasks(showAll = false) {
+  calculateProgress();
+      const todayList = document.getElementById("today-task-list");
+      const heading = document.getElementById("today-heading");
+
+      let displayTasks;
+      if (showAll) {
+        heading.textContent = "كل المهام";
+        displayTasks = tasks;
+      } else {
+        const today = new Date().toLocaleDateString('ar-EG', { weekday: 'long' });
+        heading.textContent = `مهام اليوم (${today})`;
+        displayTasks = tasks.filter(t => t.day === today);
+      }
+
+      todayList.innerHTML = "";
+
+      if (displayTasks.length === 0) {
+        todayList.innerHTML = '<li class="list-group-item text-center text-muted">لا توجد مهام.</li>';
+        return;
+      }
+
+      displayTasks.forEach(task => {
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.innerHTML = `
+          <div>
+            <strong>${task.title}</strong> ${task.time ? '🕒 ' + task.time : ''}<br>
+            <small class="text-muted">${task.priority} - ${task.note}</small>
+          </div>
+          <button class="btn btn-sm btn-danger" onclick="deleteTask(${task.id})">حذف</button>
+        `;
+        todayList.appendChild(li);
+      });
+    }
+
+    function filterByDay(day) {
+      renderTodayTasks(true);
+      if (!day) return;
+      const filtered = tasks.filter(t => t.day === day);
+      const list = document.getElementById("today-task-list");
+      const heading = document.getElementById("today-heading");
+      heading.textContent = `المهام ليوم ${day}`;
+      list.innerHTML = "";
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<li class="list-group-item text-center text-muted">لا توجد مهام لهذا اليوم.</li>';
+        return;
+      }
+
+      filtered.forEach(task => {
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.innerHTML = `
+          <div>
+            <strong>${task.title}</strong> ${task.time ? '🕒 ' + task.time : ''}<br>
+            <small class="text-muted">${task.priority} - ${task.note}</small>
+          </div>
+          <button class="btn btn-sm btn-danger" onclick="deleteTask(${task.id})">حذف</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+
+    renderTodayTasks();
+  
+function priorityValue(p) {
+  if (p === "عالية") return 3;
+  if (p === "متوسطة") return 2;
+  return 1;
+}
+
+function renderTasks() {
+  const list = document.getElementById("task-list");
+  list.innerHTML = "";
+  if (tasks.length === 0) {
+    list.innerHTML = '<li class="list-group-item text-center text-muted">لا توجد مهام.</li>';
+    return;
+  }
+  tasks.sort((a, b) => priorityValue(b.priority) - priorityValue(a.priority));
+tasks.forEach(task => {
+    const li = document.createElement("li");
+    li.className = "list-group-item d-flex justify-content-between align-items-center";
+    li.innerHTML = `
+      <div>
+        <strong>${task.title}</strong> - ${task.day} ${task.done ? '✅' : ''} ${task.time ? '🕒 ' + task.time : ''}<br>
+        <small class="text-muted">${task.priority} - ${task.note}</small>
+      </div>
+      <div>
+        <button class="btn btn-sm btn-outline-success me-2" onclick="toggleDone(${task.id})">${task.done ? '↩️ إلغاء' : '✅ إنجاز'}</button>
+        <button class="btn btn-sm btn-secondary me-2" onclick="editTask(${task.id})">تعديل</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteTask(${task.id})">حذف</button>
+      </div>
+    `;
+    list.appendChild(li);
+  });
+}
+
+function deleteAllTasks() {
+  if (confirm("هل أنت متأكد من حذف جميع المهام؟")) {
+    tasks = [];
+    saveTasks();
+    renderTasks();
+    renderTodayTasks();
+    calculateProgress();
+  }
+}
+
+function editTask(id) {
+  const task = tasks.find(t => t.id === id);
+  const newTitle = prompt("تعديل العنوان:", task.title);
+  const newDay = prompt("تعديل اليوم:", task.day);
+  if (newTitle && newDay) {
+    task.title = newTitle;
+    task.day = newDay;
+    saveTasks();
+    renderTasks();
+    renderTodayTasks();
+    calculateProgress();
+  }
+}
+
+
+let timer;
+let duration = 25 * 60;
+function startPomodoro() {
+  clearInterval(timer);
+  duration = 25 * 60;
+  timer = setInterval(() => {
+    if (duration <= 0) {
+      clearInterval(timer);
+      alert("انتهى الوقت!");
+      duration = 25 * 60;
+    } else {
+      duration--;
+      const min = String(Math.floor(duration / 60)).padStart(2, '0');
+      const sec = String(duration % 60).padStart(2, '0');
+      document.getElementById("pomodoro-timer").textContent = `${min}:${sec}`;
+    }
+  }, 1000);
+}
+
+function pausePomodoro() {
+  clearInterval(timer);
+}
+
+function exportTasks() {
+  if (tasks.length === 0) return alert("لا توجد مهام للتصدير");
+  let csv = "العنوان,اليوم,الوقت,الأولوية,ملاحظات"
+
+  tasks.forEach(t => {
+    csv += `${t.title},${t.day},${t.time},${t.priority},${t.note}
+`;
+  });
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "مهامي.csv");
+  link.click();
+}
+function toggleDone(id) {
+  const task = tasks.find(t => t.id === id);
+  task.done = !task.done;
+  saveTasks();
+  renderTasks();
+  renderTodayTasks();
+  calculateProgress();
+}
+
+// تنبيه عند اقتراب موعد المهمة خلال 10 دقائق
+function checkUpcomingTasks() {
+  const now = new Date();
+  const currentDay = now.toLocaleDateString('ar-EG', { weekday: 'long' });
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  tasks.forEach(task => {
+    if (task.day === currentDay && task.time && !task.notified) {
+      const [h, m] = task.time.split(":").map(Number);
+      const taskMinutes = h * 60 + m;
+      if (taskMinutes - currentMinutes <= 10 && taskMinutes - currentMinutes > 0) {
+        // إشعار
+        if (Notification.permission === "granted") {
+          new Notification("📌 تذكير بمهمة:", {
+            body: `${task.title} - ${task.time}`,
+          });
+        }
+        task.notified = true;
+        saveTasks();
+      }
+    }
+  });
+}
+
+// طلب الإذن للإشعارات
+if ("Notification" in window && Notification.permission !== "granted") {
+  Notification.requestPermission();
+}
+
+// تحقق كل دقيقة
+setInterval(checkUpcomingTasks, 60000);
+
+function renderWeeklyCalendar() {
+  const calendar = document.getElementById("weekly-calendar");
+  const days = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+  calendar.innerHTML = "";
+
+  days.forEach(day => {
+    const dayTasks = tasks.filter(t => t.day === day);
+    const row = document.createElement("tr");
+
+    const dayCell = document.createElement("td");
+    dayCell.textContent = day;
+
+    const taskCell = document.createElement("td");
+    if (dayTasks.length === 0) {
+      taskCell.innerHTML = '<span class="text-muted">لا توجد مهام</span>';
+    } else {
+      const list = document.createElement("ul");
+      list.className = "list-unstyled mb-0 text-start";
+      dayTasks.forEach(task => {
+        const item = document.createElement("li");
+        item.textContent = `🔹 ${task.title} ${task.time ? '🕒 ' + task.time : ''}`;
+        list.appendChild(item);
+      });
+      taskCell.appendChild(list);
+    }
+
+    row.appendChild(dayCell);
+    row.appendChild(taskCell);
+    calendar.appendChild(row);
+  });
+}
+
+function importTasks(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      let imported;
+      if (file.name.endsWith('.json')) {
+        imported = JSON.parse(e.target.result);
+      } else {
+        const lines = e.target.result.trim().split(
+).slice(1); // Skip header
+        imported = lines.map(line => {
+          const [title, day, time, priority, note] = line.split(',');
+          return { id: Date.now() + Math.random(), title, day, time, priority, note, done: false };
+        });
+      }
+      tasks = tasks.concat(imported);
+      saveTasks();
+      renderTasks();
+      renderTodayTasks();
+      calculateProgress();
+      renderWeeklyCalendar();
+    } catch (err) {
+      alert("خطأ في قراءة الملف.");
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+// تفعيل الوضع الليلي تلقائيًا بعد الساعة 19:00
+const hourNow = new Date().getHours();
+if (hourNow >= 19 || hourNow < 6) {
+  document.body.classList.add("dark-mode");
+}
+
+// ✅ بحث مباشر
+function searchTasks(query) {
+  const lower = query.toLowerCase();
+  const filtered = tasks.filter(t =>
+    t.title.toLowerCase().includes(lower) ||
+    t.note.toLowerCase().includes(lower) ||
+    t.day.toLowerCase().includes(lower)
+  );
+
+  const list = document.getElementById("task-list");
+  list.innerHTML = "";
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<li class="list-group-item text-center text-muted">لا توجد نتائج.</li>';
+    return;
+  }
+
+  filtered.forEach(task => {
+    const li = document.createElement("li");
+    li.className = "list-group-item d-flex justify-content-between align-items-center";
+    li.innerHTML = `
+      <div>
+        <strong>${task.title}</strong> - ${task.day} ${task.done ? '✅' : ''} ${task.time ? '🕒 ' + task.time : ''}<br>
+        <small class="text-muted">${task.priority} - ${task.note}</small>
+      </div>
+      <div>
+        <button class="btn btn-sm btn-outline-success me-2" onclick="toggleDone(${task.id})">${task.done ? '↩️ إلغاء' : '✅ إنجاز'}</button>
+        <button class="btn btn-sm btn-secondary me-2" onclick="editTask(${task.id})">تعديل</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteTask(${task.id})">حذف</button>
+      </div>
+    `;
+    list.appendChild(li);
+  });
+}
+
+// حقل بحث مباشر أعلى القائمة
+const searchBar = document.createElement("input");
+searchBar.className = "form-control mt-4 mb-3";
+searchBar.placeholder = "🔍 ابحث في المهام...";
+searchBar.oninput = e => searchTasks(e.target.value);
+document.querySelector("#task-list").before(searchBar);
+</script>
+</body>
+</html>
